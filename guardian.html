@@ -3,40 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>فحص العيلة - مسح الوجه</title>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<title>مسح الوجه - شغال</title>
 <style>
 body{font-family:system-ui;background:#f0f9ff;padding:15px}
 .box{background:white;max-width:650px;margin:auto;padding:20px;border-radius:20px;box-shadow:0 4px 20px #0001}
 label{font-weight:bold;margin-top:10px;display:block}
 input{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-top:5px;box-sizing:border-box}
 .btn{width:100%;padding:12px;background:#3b82f6;color:white;border:none;border-radius:10px;margin-top:10px;cursor:pointer;font-weight:bold}
-.btn-gray{background:#6b7280}.btn-green{background:#10b981}.btn-orange{background:#f59e0b}
+.btn-gray{background:#6b7280}.btn-green{background:#10b981}
 .child-card{background:#f8fafc;border:1px dashed #94a3b8;padding:12px;border-radius:12px;margin-top:10px}
 .person-btn{padding:12px;border-radius:12px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
-.monitoring{background:#e0f2fe;border:1px solid #38bdf8}
-.done{background:#dcfce7;border:1px solid #22c55e}
-.need{background:#ffedd5;border:1px solid #f97316}
-#cameraBox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000c;z-index:999;justify-content:center;align-items:center;flex-direction:column}
-#video{width:90%;max-width:400px;border-radius:20px;border:3px solid white}
+.monitoring{background:#e0f2fe;border:1px solid #38bdf8}.done{background:#dcfce7}.need{background:#ffedd5}
+#cameraBox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:999;justify-content:center;align-items:center;flex-direction:column}
+#video{width:90%;max-width:400px;border-radius:20px;border:3px solid white;background:black}
 .face-img{width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid #3b82f6}
 </style>
 </head>
 <body>
 <div class="box">
-<h2 style="text-align:center">👨‍👩‍👧 فحص العيلة - مسح الوجه</h2>
+<h2 style="text-align:center">👨‍👩‍👧 مسح الوجه للتأكد</h2>
 <div id="formSection">
 <label>اسم ولي الأمر</label>
 <input id="parentName" placeholder="اسمك">
 <div id="childrenList">
-<div class="child-card"><label>اسم الفرد 1</label><input class="cName" placeholder="مثال: روضه فادى"><label>العمر</label><input class="cAge" type="number"></div>
+<div class="child-card"><label>اسم الفرد 1</label><input class="cName"><label>العمر</label><input class="cAge" type="number"></div>
 </div>
 <button class="btn btn-gray" onclick="addChild()">+ إضافة فرد</button>
 <button class="btn" onclick="saveData()">💾 حفظ</button>
 </div>
 <div id="scanSection" style="display:none">
-<h3 style="text-align:center">✅ تم الحفظ - اعملي مسح وجه لكل طفل</h3>
-<p style="text-align:center;font-size:13px">المراقبة مستمرة - التشخيص مش في يوم وليلة</p>
+<h3 style="text-align:center">✅ اعملي مسح وجه لكل طفل</h3>
+<p style="text-align:center;font-size:13px;color:#475569">التطبيق بيراقب الوجه - التشخيص مش في يوم وليلة</p>
 <div id="personsToScan"></div>
 <div id="finalResult" style="display:none;margin-top:20px;padding:15px;border-radius:12px;text-align:center"></div>
 </div>
@@ -44,69 +41,83 @@ input{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-to
 
 <div id="cameraBox">
 <video id="video" autoplay muted playsinline></video>
-<p id="faceStatus" style="color:white;margin-top:10px">جاري تحميل كشف الوجه...</p>
+<p style="color:white;margin:10px">وجهي الكاميرا لوجه الطفل</p>
 <canvas id="canvas" style="display:none"></canvas>
-<button class="btn btn-green" id="captureBtn" style="width:80%;max-width:300px" onclick="captureFace()">📸 التقاط الوجه والتأكد</button>
+<button class="btn btn-green" style="width:80%;max-width:300px" onclick="captureFace()">📸 التقاط الوجه الآن</button>
 <button class="btn btn-gray" style="width:80%;max-width:300px" onclick="closeCamera()">إغلاق</button>
+<p id="debug" style="color:yellow;font-size:12px"></p>
 </div>
 
 <script>
-let childCount=1, currentScanIdx=null, stream=null;
+let childCount=1,currentScanIdx=null,stream=null;
 function addChild(){childCount++;let d=document.createElement('div');d.className='child-card';d.innerHTML=`<label>اسم الفرد ${childCount}</label><input class="cName"><label>العمر</label><input class="cAge" type="number">`;childrenList.appendChild(d);}
-let family=JSON.parse(localStorage.getItem('family_face')||'[]');
-async function loadModels(){try{await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights');document.getElementById('faceStatus').innerText='وجهي الكاميرا للطفل - النظام بيراقب الوجه';}catch(e){document.getElementById('faceStatus').innerText='كشف الوجه جاهز - وجهي الكاميرا';}}
-loadModels();
+let family=JSON.parse(localStorage.getItem('family_face2')||'[]');
 if(family.length>0){formSection.style.display='none';scanSection.style.display='block';render();}
 function saveData(){
- let parent=parentName.value;
- let names=document.querySelectorAll('.cName'), ages=document.querySelectorAll('.cAge');
+ let names=document.querySelectorAll('.cName'),ages=document.querySelectorAll('.cAge');
  family=[];names.forEach((el,i)=>{if(el.value)family.push({name:el.value,age:ages[i].value,status:'pending',faceImg:null,days:1,logs:[],startDate:new Date().toLocaleDateString()})});
- if(!parent||family.length==0){alert('اكتبي اسم');return;}
- localStorage.setItem('family_face',JSON.stringify(family));
+ if(family.length==0){alert('اكتبي اسم');return;}
+ localStorage.setItem('family_face2',JSON.stringify(family));
  formSection.style.display='none';scanSection.style.display='block';render();
 }
 function render(){
  let c=document.getElementById('personsToScan');c.innerHTML='';
  family.forEach((p,idx)=>{
-  let cls='person-btn monitoring', action='';
   let img=p.faceImg?`<img src="${p.faceImg}" class="face-img">`:'';
-  if(p.status=='excluded'){cls='person-btn done';action=`<span>مستبعد ✅ ${img}</span>`;}
-  else if(p.status=='need'){cls='person-btn need';action=`<span>محتاج فحص ⚠️ ${img}</span>`;}
-  else if(p.status=='monitoring'){cls='person-btn monitoring';action=`<div><span>${img} 👀 قيد المراقبة - يوم ${p.days}</span><br><button class="btn btn-gray" style="width:auto;padding:6px 10px;font-size:12px;background:#0ea5e9" onclick="openCamera(${idx})">📷 مسح وجه اليوم للتأكد</button> <button class="btn btn-green" style="width:auto;padding:6px 10px;font-size:12px" onclick="addLog(${idx})">+ ملاحظة</button> <button class="btn btn-orange" style="width:auto;padding:6px 10px;font-size:12px" onclick="endMonitoring(${idx})">إنهاء</button></div>`;}
-  else{action=`<div>${img}<button class="btn btn-green" style="width:auto;margin:0 10px;padding:8px 12px" onclick="openCamera(${idx})">📷 ابدأ مسح الوجه لـ ${p.name}</button></div>`;}
+  let action='';
+  if(p.status=='excluded') action=`<span>مستبعد ✅ ${img}</span>`;
+  else if(p.status=='need') action=`<span>محتاج فحص ⚠️ ${img}</span>`;
+  else if(p.status=='monitoring') action=`<div>${img} 👀 يوم ${p.days}<br><button class="btn btn-gray" style="width:auto;padding:6px 10px;font-size:12px;background:#0ea5e9" onclick="openCamera(${idx})">📷 مسح وجه للتأكد</button> <button class="btn btn-green" style="width:auto;padding:6px 10px;font-size:12px" onclick="addLog(${idx})">+ ملاحظة</button> <button class="btn" style="width:auto;padding:6px 10px;font-size:12px;background:#f59e0b" onclick="endMonitoring(${idx})">إنهاء</button></div>`;
+  else action=`<div>${img}<button class="btn btn-green" style="width:auto;margin:0 10px;padding:8px 12px" onclick="openCamera(${idx})">📷 ابدأ مسح الوجه لـ ${p.name}</button></div>`;
   let logsHtml=p.logs.length?`<div style="background:#fffbeb;border:1px dashed #f59e0b;padding:8px;border-radius:10px;margin-top:5px;font-size:12px">📝 ${p.logs.join(' | ')}</div>`:'';
-  c.innerHTML+=`<div class="${cls}"><span>👶 ${p.name} - ${p.age} سنة</span>${action}</div>${logsHtml}`;
+  c.innerHTML+=`<div class="person-btn monitoring" style="background:${p.status=='excluded'?'#dcfce7':p.status=='need'?'#ffedd5':'#e0f2fe'}"><span>👶 ${p.name}</span>${action}</div>${logsHtml}`;
  });
- localStorage.setItem('family_face',JSON.stringify(family));
+ localStorage.setItem('family_face2',JSON.stringify(family));
  checkAllDone();
 }
 async function openCamera(idx){
- currentScanIdx=idx;document.getElementById('cameraBox').style.display='flex';
- try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});document.getElementById('video').srcObject=stream;}catch(e){alert('افتحي الكاميرا - لازم تسمحي للكاميرا');}
-}
-function closeCamera(){document.getElementById('cameraBox').style.display='none';if(stream){stream.getTracks().forEach(t=>t.stop());}}
-async function captureFace(){
- const video=document.getElementById('video');
- const canvas=document.getElementById('canvas');
- canvas.width=video.videoWidth;canvas.height=video.videoHeight;
- canvas.getContext('2d').drawImage(video,0,0);
- let imgData=canvas.toDataURL('image/jpeg');
- // كشف وجه بسيط
+ currentScanIdx=idx;
+ document.getElementById('cameraBox').style.display='flex';
+ document.getElementById('debug').innerText='بفتح الكاميرا...';
  try{
-  const detection=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-  if(!detection){alert('مفيش وجه ظاهر! قربي الطفل للكاميرا');return;}
- }catch(e){/* لو الموديل محملش هنكمل عادي */}
- // حفظ صورة الوجه
- family[currentScanIdx].faceImg=imgData;
- if(family[currentScanIdx].status=='pending'){
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+  let video=document.getElementById('video');
+  video.srcObject=stream;
+  await video.play();
+  document.getElementById('debug').innerText='الكاميرا شغالة - دوسي التقاط';
+ }catch(e){
+  document.getElementById('debug').innerText='خطأ: '+e.message;
+  alert('لازم تسمحي للكاميرا - افتحي الموقع من Chrome: '+e.message);
+ }
+}
+function closeCamera(){
+ document.getElementById('cameraBox').style.display='none';
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+}
+function captureFace(){
+ try{
+  let video=document.getElementById('video');
+  let canvas=document.getElementById('canvas');
+  if(video.videoWidth==0){alert('استني الكاميرا تحمل ثانية');return;}
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  let imgData=canvas.toDataURL('image/jpeg',0.8);
+  
+  family[currentScanIdx].faceImg=imgData;
+  if(family[currentScanIdx].status=='pending'){
    family[currentScanIdx].status='monitoring';
    family[currentScanIdx].logs.push(`يوم 1: تم مسح الوجه والتعرف على ${family[currentScanIdx].name} ✅`);
- }else{
+  }else{
    family[currentScanIdx].days++;
-   family[currentScanIdx].logs.push(`يوم ${family[currentScanIdx].days}: تم التأكد من الوجه - نفس الطفل ${family[currentScanIdx].name} ✅`);
+   family[currentScanIdx].logs.push(`يوم ${family[currentScanIdx].days}: تأكد الوجه - نفس الطفل ✅`);
+  }
+  closeCamera();
+  render();
+  alert(`تم مسح وجه ${family[currentScanIdx].name} بنجاح ✅`);
+ }catch(e){
+  alert('خطأ في الالتقاط: '+e.message);
  }
- closeCamera();render();
- alert(`تم مسح وجه ${family[currentScanIdx].name} بنجاح ✅\nالآن النظام عارف ان ده هو الطفل المطلوب وهيتابعه`);
 }
 function addLog(idx){
  let note=prompt(`ملاحظة اليوم لـ ${family[idx].name}:`);
@@ -116,7 +127,7 @@ function endMonitoring(idx){
  let logs=family[idx].logs.join(' ');
  let risky=['ضعيف','لا يتواصل','تكرار','لا يستجيب','صراخ','انعزال'];
  let isRisky=risky.some(w=>logs.includes(w));
- let choice=confirm(`إنهاء مراقبة ${family[idx].name} بعد ${family[idx].days} أيام؟\nالنظام يقترح: ${isRisky?'محتاج فحص ⚠️':'مستبعد ✅'}\n\nOK=مستبعد Cancel=محتاج فحص`);
+ let choice=confirm(`إنهاء مراقبة ${family[idx].name} بعد ${family[idx].days} أيام؟\nيقترح: ${isRisky?'محتاج فحص':'مستبعد'}\nOK=مستبعد Cancel=محتاج`);
  family[idx].status=choice?'excluded':'need';
  render();
 }
@@ -124,7 +135,7 @@ function checkAllDone(){
  if(family.length>0 && family.every(f=>f.status=='excluded'||f.status=='need')){
   let ex=family.filter(f=>f.status=='excluded').length, need=family.filter(f=>f.status=='need').length;
   let div=document.getElementById('finalResult');div.style.display='block';div.style.background=need==0?'#dcfce7':'#ffedd5';
-  div.innerHTML=`<h3>📊 نتيجة المراقبة بالوجه</h3><p>العدد: ${family.length}</p><p>✅ مستبعد: ${ex}</p><p>⚠️ محتاج فحص: ${need}</p><p style="font-size:11px">تم التأكد من هوية كل طفل عن طريق مسح الوجه</p><button class="btn btn-gray" onclick="localStorage.clear();location.reload()">بدء دورة جديدة</button>`;
+  div.innerHTML=`<h3>📊 نتيجة المراقبة بالوجه</h3><p>العدد: ${family.length}</p><p>✅ مستبعد: ${ex}</p><p>⚠️ محتاج: ${need}</p><button class="btn btn-gray" onclick="localStorage.clear();location.reload()">دورة جديدة</button>`;
  }
 }
 </script>

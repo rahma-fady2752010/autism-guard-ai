@@ -3,84 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ولي أمر - حفظ و فحص فردي</title>
+<title>فحص العيلة - أي عدد</title>
 <style>
 body{font-family:system-ui;background:#f0f9ff;padding:15px}
-.box{background:white;max-width:550px;margin:20px auto;padding:25px;border-radius:20px;box-shadow:0 4px 20px #0001}
+.box{background:white;max-width:580px;margin:20px auto;padding:25px;border-radius:20px;box-shadow:0 4px 20px #0001}
 label{font-weight:bold;margin-top:12px;display:block}
 input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-top:5px;box-sizing:border-box}
-.btn{width:100%;padding:12px;background:#3b82f6;color:white;border:none;border-radius:10px;margin-top:12px;cursor:pointer;font-size:16px;font-weight:bold}
-.btn-green{background:#10b981}
-.btn-gray{background:#6b7280}
+.btn{width:100%;padding:12px;background:#3b82f6;color:white;border:none;border-radius:10px;margin-top:12px;cursor:pointer;font-weight:bold}
+.btn-green{background:#10b981}.btn-gray{background:#6b7280}.btn-orange{background:#f59e0b}
 .child-card{background:#f8fafc;border:1px dashed #94a3b8;padding:12px;border-radius:12px;margin-top:10px}
-#scanSection{display:none;margin-top:25px;border-top:2px solid #e2e8f0;padding-top:20px}
-.person-btn{display:flex;justify-content:space-between;align-items:center;background:#eef2ff;padding:12px;border-radius:10px;margin-top:8px}
+#scanSection{display:none}
+.person-btn{display:flex;justify-content:space-between;align-items:center;background:#eef2ff;padding:12px;border-radius:12px;margin-top:10px}
+.person-btn.done{background:#dcfce7;border:1px solid #22c55e}
+.person-btn.need{background:#ffedd5;border:1px solid #f97316}
+.progress{height:10px;background:#e5e7eb;border-radius:10px;margin:15px 0;overflow:hidden}
+.progress div{height:100%;background:#3b82f6;width:0%;transition:0.5s}
 </style>
 </head>
 <body>
 <div class="box">
-<h2 style="text-align:center">👨‍👩‍👧 صفحة ولي الأمر</h2>
-
+<h2 style="text-align:center">👨‍👩‍👧 فحص العيلة - أي عدد</h2>
 <div id="formSection">
 <label>اسم ولي الأمر</label>
-<input type="text" id="parentName" placeholder="اكتبي اسمك">
-
+<input type="text" id="parentName" placeholder="اسمك">
 <div id="childrenList">
 <div class="child-card">
-<label>اسم الطفل 1</label>
-<input type="text" class="cName" placeholder="اسم الطفل">
-<label>عمر الطفل</label>
-<input type="number" class="cAge" placeholder="مثال: 4">
+<label>اسم الفرد 1</label>
+<input type="text" class="cName" placeholder="الاسم">
+<label>العمر</label>
+<input type="number" class="cAge" placeholder="العمر">
 </div>
 </div>
-
-<button class="btn btn-gray" onclick="addChild()">+ إضافة فرد آخر</button>
-<button class="btn" onclick="saveData()">💾 حفظ البيانات</button>
-<a href="index.html"><button class="btn btn-gray" style="background:#94a3b8">رجوع للرئيسية</button></a>
+<button class="btn btn-gray" onclick="addChild()">+ إضافة فرد (أي عدد)</button>
+<button class="btn" onclick="saveData()">💾 حفظ العيلة كلها</button>
 </div>
-
 <div id="scanSection">
-<h3>✅ تم حفظ البيانات</h3>
-<p>الآن ابدأ الفحص لكل فرد على حدى:</p>
+<h3 style="text-align:center">✅ تم حفظ البيانات</h3>
+<p style="text-align:center">اعملي سكان لكل فرد لوحده - أي عدد:</p>
+<div class="progress"><div id="prog"></div></div>
+<p id="progText" style="text-align:center"></p>
 <div id="personsToScan"></div>
+<div id="finalResult" style="display:none;margin-top:20px;padding:15px;border-radius:12px;text-align:center"></div>
 </div>
 </div>
-
 <script>
-let childCount = 1;
+let childCount=1;
 function addChild(){
  childCount++;
- let div = document.createElement('div');
- div.className = 'child-card';
- div.innerHTML = `<label>اسم الطفل ${childCount}</label><input type="text" class="cName" placeholder="اسم الطفل"><label>عمر الطفل</label><input type="number" class="cAge" placeholder="مثال: 4">`;
- document.getElementById('childrenList').appendChild(div);
+ let d=document.createElement('div');
+ d.className='child-card';
+ d.innerHTML=`<label>اسم الفرد ${childCount}</label><input type="text" class="cName" placeholder="الاسم"><label>العمر</label><input type="number" class="cAge" placeholder="العمر">`;
+ document.getElementById('childrenList').appendChild(d);
 }
-
+let family=[];
 function saveData(){
- let parent = document.getElementById('parentName').value;
- let names = document.querySelectorAll('.cName');
- let ages = document.querySelectorAll('.cAge');
- let family = [];
- names.forEach((el,i)=>{
-   if(el.value) family.push({name:el.value, age:ages[i].value});
- });
- if(!parent || family.length==0){ alert('اكتبي اسمك واسم طفل واحد على الأقل'); return; }
- 
- localStorage.setItem('guardianData', JSON.stringify({parent, family, date:new Date().toISOString()}));
- 
- // اعرض قسم السكان الفردي
+ let parent=document.getElementById('parentName').value;
+ let names=document.querySelectorAll('.cName');
+ let ages=document.querySelectorAll('.cAge');
+ family=[];
+ names.forEach((el,i)=>{ if(el.value) family.push({name:el.value, age:ages[i].value, status:'pending'}) });
+ if(!parent || family.length==0){ alert('اكتبي اسمك وفرد'); return; }
  document.getElementById('formSection').style.display='none';
  document.getElementById('scanSection').style.display='block';
- let container = document.getElementById('personsToScan');
- container.innerHTML='';
- family.forEach((p, idx)=>{
-   container.innerHTML += `<div class="person-btn"><span>👶 ${p.name} - ${p.age} سنوات</span><button class="btn btn-green" style="width:auto;margin:0;padding:8px 15px" onclick="startScan('${p.name}')">ابدأ السكان</button></div>`;
- });
+ render();
 }
-
-function startScan(name){
- alert('بدء فحص / سكان للطفل: ' + name + '\n(هنا هنفتح صفحة الأسئلة أو الكاميرا)');
- // تقدر تغير السطر ده يفتح صفحة تانية: window.location.href = 'test.html?name='+name
+function render(){
+ let c=document.getElementById('personsToScan');
+ c.innerHTML='';
+ family.forEach((p,idx)=>{
+  let cls='person-btn';
+  let btn='';
+  if(p.status=='excluded'){ cls+=' done'; btn=`<span style="color:#16a34a">مستبعد ✅</span>`; }
+  else if(p.status=='need'){ cls+=' need'; btn=`<span style="color:#ea580c">محتاج فحص ⚠️</span>`; }
+  else { btn=`<button class="btn btn-green" style="width:auto;margin:0;padding:8px 12px" onclick="scanPerson(${idx})">ابدأ السكان</button>`; }
+  c.innerHTML+=`<div class="${cls}"><span>👶 ${p.name} - ${p.age} سنة</span>${btn}</div>`;
+ });
+ updateProg();
+}
+function scanPerson(idx){
+ let name=family[idx].name;
+ let choice=confirm(`سكان لـ ${name}\n\nOK = سليم (مستبعد)\nCancel = محتاج فحص`);
+ family[idx].status=choice?'excluded':'need';
+ render();
+ let done=family.filter(f=>f.status!='pending').length;
+ if(done==family.length) showFinal();
+}
+function showFinal(){
+ let ex=family.filter(f=>f.status=='excluded').length;
+ let need=family.filter(f=>f.status=='need').length;
+ let div=document.getElementById('finalResult');
+ div.style.display='block';
+ div.style.background=need==0?'#dcfce7':'#ffedd5';
+ div.innerHTML=`<h3>📊 نتيجة فحص العيلة</h3><p>العدد: ${family.length}</p><p>✅ مستبعد: ${ex}</p><p>⚠️ محتاج فحص: ${need}</p><p>${need>0?`اللي محتاجين: ${family.filter(f=>f.status=='need').map(f=>f.name).join('، ')}`:`كل العيلة مستبعدة - لا يوجد تاريخ عائلي`}</p>`;
+}
+function updateProg(){
+ let done=family.filter(f=>f.status!='pending').length;
+ let perc=family.length?Math.round((done/family.length)*100):0;
+ document.getElementById('prog').style.width=perc+'%';
+ document.getElementById('progText').innerText=`تم فحص ${done} من ${family.length} - ${perc}%`;
 }
 </script>
 </body>

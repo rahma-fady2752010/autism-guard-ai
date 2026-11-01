@@ -3,31 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ولي أمر</title>
+<title>ولي أمر - حفظ و فحص فردي</title>
 <style>
-body{font-family:system-ui;background:#f0f9ff;padding:20px}
-.box{background:white;max-width:500px;margin:40px auto;padding:30px;border-radius:20px;box-shadow:0 4px 20px #0001}
-label{font-weight:bold;margin-top:15px;display:block}
+body{font-family:system-ui;background:#f0f9ff;padding:15px}
+.box{background:white;max-width:550px;margin:20px auto;padding:25px;border-radius:20px;box-shadow:0 4px 20px #0001}
+label{font-weight:bold;margin-top:12px;display:block}
 input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-top:5px;box-sizing:border-box}
-.btn{width:100%;padding:12px;background:#3b82f6;color:white;border:none;border-radius:10px;margin-top:15px;cursor:pointer;font-size:16px}
+.btn{width:100%;padding:12px;background:#3b82f6;color:white;border:none;border-radius:10px;margin-top:12px;cursor:pointer;font-size:16px;font-weight:bold}
+.btn-green{background:#10b981}
 .btn-gray{background:#6b7280}
+.child-card{background:#f8fafc;border:1px dashed #94a3b8;padding:12px;border-radius:12px;margin-top:10px}
+#scanSection{display:none;margin-top:25px;border-top:2px solid #e2e8f0;padding-top:20px}
+.person-btn{display:flex;justify-content:space-between;align-items:center;background:#eef2ff;padding:12px;border-radius:10px;margin-top:8px}
 </style>
 </head>
 <body>
 <div class="box">
 <h2 style="text-align:center">👨‍👩‍👧 صفحة ولي الأمر</h2>
 
-<label>الاسم</label>
-<input type="text" placeholder="اكتبي اسمك">
+<div id="formSection">
+<label>اسم ولي الأمر</label>
+<input type="text" id="parentName" placeholder="اكتبي اسمك">
 
-<label>اسم الطفل</label>
-<input type="text" placeholder="اسم الطفل">
-
+<div id="childrenList">
+<div class="child-card">
+<label>اسم الطفل 1</label>
+<input type="text" class="cName" placeholder="اسم الطفل">
 <label>عمر الطفل</label>
-<input type="number" placeholder="مثال: 4">
-
-<button class="btn">ابدأ الفحص</button>
-<a href="index.html"><button class="btn btn-gray">رجوع للرئيسية</button></a>
+<input type="number" class="cAge" placeholder="مثال: 4">
 </div>
+</div>
+
+<button class="btn btn-gray" onclick="addChild()">+ إضافة فرد آخر</button>
+<button class="btn" onclick="saveData()">💾 حفظ البيانات</button>
+<a href="index.html"><button class="btn btn-gray" style="background:#94a3b8">رجوع للرئيسية</button></a>
+</div>
+
+<div id="scanSection">
+<h3>✅ تم حفظ البيانات</h3>
+<p>الآن ابدأ الفحص لكل فرد على حدى:</p>
+<div id="personsToScan"></div>
+</div>
+</div>
+
+<script>
+let childCount = 1;
+function addChild(){
+ childCount++;
+ let div = document.createElement('div');
+ div.className = 'child-card';
+ div.innerHTML = `<label>اسم الطفل ${childCount}</label><input type="text" class="cName" placeholder="اسم الطفل"><label>عمر الطفل</label><input type="number" class="cAge" placeholder="مثال: 4">`;
+ document.getElementById('childrenList').appendChild(div);
+}
+
+function saveData(){
+ let parent = document.getElementById('parentName').value;
+ let names = document.querySelectorAll('.cName');
+ let ages = document.querySelectorAll('.cAge');
+ let family = [];
+ names.forEach((el,i)=>{
+   if(el.value) family.push({name:el.value, age:ages[i].value});
+ });
+ if(!parent || family.length==0){ alert('اكتبي اسمك واسم طفل واحد على الأقل'); return; }
+ 
+ localStorage.setItem('guardianData', JSON.stringify({parent, family, date:new Date().toISOString()}));
+ 
+ // اعرض قسم السكان الفردي
+ document.getElementById('formSection').style.display='none';
+ document.getElementById('scanSection').style.display='block';
+ let container = document.getElementById('personsToScan');
+ container.innerHTML='';
+ family.forEach((p, idx)=>{
+   container.innerHTML += `<div class="person-btn"><span>👶 ${p.name} - ${p.age} سنوات</span><button class="btn btn-green" style="width:auto;margin:0;padding:8px 15px" onclick="startScan('${p.name}')">ابدأ السكان</button></div>`;
+ });
+}
+
+function startScan(name){
+ alert('بدء فحص / سكان للطفل: ' + name + '\n(هنا هنفتح صفحة الأسئلة أو الكاميرا)');
+ // تقدر تغير السطر ده يفتح صفحة تانية: window.location.href = 'test.html?name='+name
+}
+</script>
 </body>
-  </html>
+</html>

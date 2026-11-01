@@ -10,7 +10,8 @@ body{font-family:system-ui;background:#f8fafc;margin:0;padding:20px;color:#1e293
 .header{text-align:center;padding:30px 0}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .card{background:white;border-radius:20px;padding:25px;text-align:center;box-shadow:0 4px 20px #0001}
-.btn{background:#3b82f6;color:white;padding:10px 20px;border-radius:10px;border:none}
+.btn{background:#3b82f6;color:white;padding:12px 20px;border-radius:10px;border:none;cursor:pointer;width:100%;font-size:16px}
+.btn:active{transform:scale(0.97)}
 .consent{background:#fff7ed;border:1px solid #fed7aa;padding:15px;border-radius:12px;margin-top:30px}
 </style>
 </head>
@@ -23,23 +24,25 @@ body{font-family:system-ui;background:#f8fafc;margin:0;padding:20px;color:#1e293
 </div>
 <div class="cards">
 <div class="card">
-<div style="font-size:40px">👨‍👩‍👧</div>
+<div style="font-size:50px">👨‍👩‍👧</div>
 <h3>ولي أمر</h3>
 <p>فحص مبكر لطفلك</p>
-<button class="btn">دخول كولي أمر</button>
+<button class="btn" onclick="enterGuardian()">دخول كولي أمر</button>
 </div>
 <div class="card">
-<div style="font-size:40px">👩‍⚕️</div>
+<div style="font-size:50px">👩‍⚕️</div>
 <h3>مختص</h3>
 <p>متابعة الحالات</p>
-<button class="btn">دخول كمختص</button>
+<button class="btn" onclick="enterSpecialist()">دخول كمختص</button>
 </div>
 </div>
 <div class="consent">
 <h3>🔒 إذن ولي الأمر</h3>
 <p>أوافق على استخدام البيانات بشكل مجهول لتحسين النموذج مع الحفاظ على الخصوصية.</p>
-<label><input type="checkbox"> أوافق</label>
+<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="consentCheck"> أوافق</label>
 </div>
 </div>
-</body>
-</html>
+<script>
+function checkConsent(){
+  const cb=document.getElementById('consentCheck');
+  if(!cb.checked

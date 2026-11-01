@@ -11,7 +11,6 @@ body{font-family:system-ui;background:#f8fafc;margin:0;padding:20px;color:#1e293
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .card{background:white;border-radius:20px;padding:25px;text-align:center;box-shadow:0 4px 20px #0001}
 .btn{background:#3b82f6;color:white;padding:12px 20px;border-radius:10px;border:none;cursor:pointer;width:100%;font-size:16px}
-.btn:active{transform:scale(0.97)}
 .consent{background:#fff7ed;border:1px solid #fed7aa;padding:15px;border-radius:12px;margin-top:30px}
 </style>
 </head>
@@ -45,4 +44,22 @@ body{font-family:system-ui;background:#f8fafc;margin:0;padding:20px;color:#1e293
 <script>
 function checkConsent(){
   const cb=document.getElementById('consentCheck');
-  if(!cb.checked
+  if(!cb.checked){
+    alert('من فضلك علمي على أوافق الأول ✅');
+    return false;
+  }
+  return true;
+}
+function enterGuardian(){
+  if(!checkConsent()) return;
+  alert('تم ✅ دخول ولي أمر');
+  window.location.href='guardian.html';
+}
+function enterSpecialist(){
+  if(!checkConsent()) return;
+  alert('تم ✅ دخول مختص');
+  window.location.href='specialist.html';
+}
+</script>
+</body>
+</html>

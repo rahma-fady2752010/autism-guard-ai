@@ -135,7 +135,42 @@ function checkAllDone(){
  if(family.length>0 && family.every(f=>f.status=='excluded'||f.status=='need')){
   let ex=family.filter(f=>f.status=='excluded').length, need=family.filter(f=>f.status=='need').length;
   let div=document.getElementById('finalResult');div.style.display='block';div.style.background=need==0?'#dcfce7':'#ffedd5';
-  div.innerHTML=`<h3>📊 نتيجة المراقبة بالوجه</h3><p>العدد: ${family.length}</p><p>✅ مستبعد: ${ex}</p><p>⚠️ محتاج: ${need}</p><button class="btn btn-gray" onclick="localStorage.clear();location.reload()">دورة جديدة</button>`;
+function checkAllDone(){
+ if(family.length>0 && family.every(f=>f.status=='excluded'||f.status=='need')){
+  let ex=family.filter(f=>f.status=='excluded').length, need=family.filter(f=>f.status=='need').length;
+  let div=document.getElementById('finalResult');
+  div.style.display='block';
+  div.style.background='white';
+  div.style.border='2px solid #3b82f6';
+  div.style.textAlign='right';
+  
+  let rows = family.map(f=>`
+    <tr>
+      <td><img src="${f.faceImg||''}" style="width:40px;height:40px;border-radius:50%"></td>
+      <td>${f.name}</td>
+      <td>${f.days} أيام</td>
+      <td>${f.status=='excluded'?'مستبعد ✅':'محتاج فحص دقيق ⚠️'}</td>
+      <td style="font-size:11px">${f.logs.slice(-2).join('<br>')}</td>
+    </tr>
+  `).join('');
+
+  div.innerHTML=`
+    <h2 style="text-align:center">📋 التقرير النهائي - Autism Guard AI</h2>
+    <p style="text-align:center;font-size:12px">تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')} | المراقبة بالوجه</p>
+    <p><b>المراقبة:</b> تم التأكد من هوية الأطفال عن طريق مسح الوجه يومياً (التشخيص ليس في يوم وليلة)</p>
+    <table border="1" style="width:100%;border-collapse:collapse;font-size:13px;text-align:center">
+      <tr style="background:#f0f9ff"><th>الصورة</th><th>الاسم</th><th>المدة</th><th>الحالة</th><th>آخر ملاحظات</th></tr>
+      ${rows}
+    </table>
+    <div style="background:${need==0?'#dcfce7':'#ffedd5'};padding:10px;border-radius:10px;margin-top:10px;text-align:center">
+      <h3>الخلاصة: ${need==0?'✅ لا يوجد مؤشرات تستدعي القلق - المتابعة المنزلية كافية':'⚠️ يوجد ${need} طفل يحتاج عرض على أخصائي تخاطب/نمو'}</h3>
+      <p style="font-size:11px">هذا التقرير ناتج عن مراقبة تراكمية وليس تشخيص طبي نهائي - يرجى مراجعة متخصص</p>
+    </div>
+    <button class="btn" onclick="window.print()" style="background:#0ea5e9;margin-top:10px">🖨️ طباعة التقرير / حفظ PDF</button>
+    <button class="btn btn-gray" onclick="localStorage.clear();location.reload()" style="margin-top:5px">🔄 بدء دورة مراقبة جديدة</button>
+  `;
+ }
+}
  }
 }
 </script>
